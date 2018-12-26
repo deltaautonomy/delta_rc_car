@@ -1,2 +1,2 @@
-# rc-car
+# RC Car
 Repository for RC car platform
