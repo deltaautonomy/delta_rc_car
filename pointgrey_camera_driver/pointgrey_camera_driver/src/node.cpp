@@ -15,6 +15,7 @@ Neither the name of the Carnegie Mellon University nor the names of its contribu
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+
 /**
    @file node.cpp
    @author Chad Rockey
@@ -29,18 +30,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "ros/ros.h"
 #include <nodelet/loader.h>
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "pointgrey_camera_node");
+  ros::init(argc, argv, "pointgrey_camera_node");
 
-    // This is code based nodelet loading, the preferred nodelet launching is done through roslaunch
-    nodelet::Loader nodelet;
-    nodelet::M_string remap(ros::names::getRemappings());
-    nodelet::V_string nargv;
-    std::string nodelet_name = ros::this_node::getName();
-    nodelet.load(nodelet_name, "pointgrey_camera_driver/PointGreyCameraNodelet", remap, nargv);
+  // This is code based nodelet loading, the preferred nodelet launching is done through roslaunch
+  nodelet::Loader nodelet;
+  nodelet::M_string remap(ros::names::getRemappings());
+  nodelet::V_string nargv;
+  std::string nodelet_name = ros::this_node::getName();
+  nodelet.load(nodelet_name, "pointgrey_camera_driver/PointGreyCameraNodelet", remap, nargv);
 
-    ros::spin();
+  ros::spin();
 
-    return 0;
+  return 0;
 }

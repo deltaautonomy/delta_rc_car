@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
-add_definitions(-std=c++14)
-
 find_package(catkin REQUIRED COMPONENTS
   camera_info_manager diagnostic_updater dynamic_reconfigure
   image_exposure_msgs image_transport nodelet roscpp sensor_msgs

@@ -15,6 +15,8 @@ Neither the name of the Carnegie Mellon University nor the names of its contribu
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+
+
 /*-*-C++-*-*/
 /**
    @file camera_exceptions.h
@@ -32,52 +34,32 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <stdexcept>
 
-class CameraTimeoutException : public std::runtime_error {
+class CameraTimeoutException: public std::runtime_error
+{
 public:
-    CameraTimeoutException()
-        : runtime_error("Image not found within timeout.")
-    {
-    }
-    CameraTimeoutException(std::string msg)
-        : runtime_error(msg.c_str())
-    {
-    }
+  CameraTimeoutException(): runtime_error("Image not found within timeout.") {}
+  CameraTimeoutException(std::string msg): runtime_error(msg.c_str()) {}
 };
 
-class CameraNotRunningException : public std::runtime_error {
+class CameraNotRunningException: public std::runtime_error
+{
 public:
-    CameraNotRunningException()
-        : runtime_error("Camera is currently not running.  Please start the capture.")
-    {
-    }
-    CameraNotRunningException(std::string msg)
-        : runtime_error(msg.c_str())
-    {
-    }
+  CameraNotRunningException(): runtime_error("Camera is currently not running.  Please start the capture.") {}
+  CameraNotRunningException(std::string msg): runtime_error(msg.c_str()) {}
 };
 
-class CameraImageNotReadyException : public std::runtime_error {
+class CameraImageNotReadyException: public std::runtime_error
+{
 public:
-    CameraImageNotReadyException()
-        : runtime_error("Image is currently not ready.")
-    {
-    }
-    CameraImageNotReadyException(std::string msg)
-        : runtime_error(msg.c_str())
-    {
-    }
+  CameraImageNotReadyException(): runtime_error("Image is currently not ready.") {}
+  CameraImageNotReadyException(std::string msg): runtime_error(msg.c_str()) {}
 };
 
-class CameraImageConsistencyError : public std::runtime_error {
+class CameraImageConsistencyError: public std::runtime_error
+{
 public:
-    CameraImageConsistencyError()
-        : runtime_error("Image consistency issue.")
-    {
-    }
-    CameraImageConsistencyError(std::string msg)
-        : runtime_error(msg.c_str())
-    {
-    }
+  CameraImageConsistencyError(): runtime_error("Image consistency issue.") {}
+  CameraImageConsistencyError(std::string msg): runtime_error(msg.c_str()) {}
 };
 
 #endif
