@@ -5,10 +5,10 @@ To view the rosbag file - `rosrun image_view image_view image:=/pt_grey/image_co
 To extract images from rosbag - follow - http://wiki.ros.org/rosbag/Tutorials/Exporting%20image%20and%20video%20data
 
 # Label creation 
-yolo_mark
-Trained on 300 images
-1 class
-YOLO V3
+- yolo_mark
+- Trained on 300 images
+- 1 class
+- YOLO V3
 
 # Running trained model
 `./darknet detector test data/obj.data  cfg/yolo-rc_car.cfg backup/yolo-rc_car_2000.weights data_test/frame0473.jpg`
