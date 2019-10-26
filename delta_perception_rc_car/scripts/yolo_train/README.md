@@ -11,5 +11,6 @@
 - YOLO V3
 
 # Running trained model
+- Download weights --> `https://drive.google.com/drive/u/4/folders/1S0hoJkS-99UUj2OeEakh3s62q82XAQXH`
 - `./darknet detector test data/obj.data  cfg/yolo-rc_car.cfg backup/yolo-rc_car_2000.weights data_test/frame0473.jpg`
 - (cfg data and names files are stored in yolo_train_setup folder)
