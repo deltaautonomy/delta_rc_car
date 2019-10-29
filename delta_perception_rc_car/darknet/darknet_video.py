@@ -49,14 +49,17 @@ class YOLO:
 
         # Set paths
         if configPath is None: self.configPath = osp.join(DARKNET_PATH, 'cfg/yolov3.cfg')
+        else: self.configPath = osp.join(DARKNET_PATH, configPath)
         if not osp.exists(self.configPath):
             raise ValueError('Invalid config path `' + osp.abspath(self.configPath) + '`')
 
         if weightPath is None: self.weightPath = osp.join(DARKNET_PATH, 'weights/yolov3.weights')
+        else: self.weightPath = osp.join(DARKNET_PATH, weightPath)
         if not osp.exists(self.weightPath):
             raise ValueError('Invalid weight path `' + osp.abspath(self.weightPath) + '`')
 
         if metaPath is None: self.metaPath = osp.join(DARKNET_PATH, 'cfg/coco.data')
+        else: self.metaPath = osp.join(DARKNET_PATH, metaPath)
         if not osp.exists(self.metaPath):
             raise ValueError('Invalid data file path `' + osp.abspath(self.metaPath) + '`')
         
@@ -65,9 +68,11 @@ class YOLO:
         if netMain is None:
             self.netMain = darknet.load_net_custom(self.configPath.encode(
                 'ascii'), self.weightPath.encode('ascii'), 0, 1) # batch size = 1
+        else: self.netMain = netMain
         
         if metaMain is None:
             self.metaMain = darknet.load_meta(self.metaPath.encode('ascii'))
+        else: self.metaMain = metaMain
         
         if altNames is None:
             try:
@@ -86,6 +91,7 @@ class YOLO:
                         pass
             except Exception:
                 pass
+        else: self.altNames = altNames
 
         # Create an image we reuse for each detect
         self.darknet_image = darknet.make_image(darknet.network_width(self.netMain),

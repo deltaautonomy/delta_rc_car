@@ -292,7 +292,7 @@ def detect_image(net, meta, im, size, thresh=.5, hier_thresh=.5, nms=.45, debug=
                     nameTag = meta.names[i]
                 else:
                     nameTag = altNames[i]
-                if nameTag in [b'car']:
+                if nameTag in [b'rc_car']:
                     bbox = convert_back(b.x * x_scale, b.y * y_scale, b.w * x_scale, b.h * y_scale)
                     res.append((nameTag, dets[j].prob[i], bbox))
 

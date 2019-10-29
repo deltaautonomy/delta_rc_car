@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+    <!-- Launch pointgrey camera -->
+    <include file="$(find pointgrey_camera_driver)/launch/camera.launch">
+        <arg name="camera_serial" value="16306167" />
+    </include>
+
     <!-- Run the object detection node -->
     <node
-        pkg="delta_perception"
+        pkg="delta_perception_rc_car"
         type="main.py"
         name="main"
         output="screen">
@@ -15,6 +20,6 @@
         type="image_view"
         respawn="false"
         output="screen">
-        <remap from="image" to="/delta/perception/object_detection/image" />
+        <remap from="image" to="/delta/perception_rc_car/object_detection/image" />
     </node>
 </launch>
