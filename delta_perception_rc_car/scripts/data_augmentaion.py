@@ -1,11 +1,9 @@
 # first run command
 # sudo pip install albumentations
-import sys
+import sys, os
 sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 from urllib.request import urlopen
-import os
-
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -20,17 +18,6 @@ from albumentations import (
     Crop,
     Compose
 )
-
-def download_image(url):
-    data = urlopen(url).read()
-    data = np.frombuffer(data, np.uint8)
-    image = cv2.imdecode(data, cv2.IMREAD_COLOR)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
-
-
-# Functions to visualize bounding boxes and class labels on an image. 
-# Based on https://github.com/facebookresearch/Detectron/blob/master/detectron/utils/vis.py
 
 BOX_COLOR = (255, 0, 0)
 TEXT_COLOR = (255, 255, 255)
@@ -58,40 +45,71 @@ def get_aug(aug, min_area=0., min_visibility=0.):
     return Compose(aug, bbox_params=BboxParams(format='coco', min_area=min_area, 
                                                min_visibility=min_visibility, label_fields=['category_id']))
 
-image = download_image('http://images.cocodataset.org/train2017/000000386298.jpg')
-# Annotations for image 386298 from COCO http://cocodataset.org/#explore?id=386298
-annotations = {'image': image, 'bboxes': [[366.7, 80.84, 132.8, 181.84], [5.66, 138.95, 147.09, 164.88]], 'category_id': [18, 17]}
-category_id_to_name = {17: 'cat', 18: 'dog'}
+def save_augmented_img(annotations, category_id_to_name, orig_file, aug_type, directory):
+    new_img = annotations['image'].copy()
+    new_name = aug_type + orig_file + ".jpg"
+    cv2.imwrite(directory + new_name, new_img)
+    f= open(directory + new_name[:-4] + ".txt","w+")
+    for idx, bbox in enumerate(annotations['bboxes']):
+        label = annotations['category_id'][idx]
+        f.write(str(label) + " "+ str((bbox[0] + bbox[2]/2)/new_img.shape[1])+ 
+            " " + str((bbox[1] + bbox[3]/2)/new_img.shape[0])+ " "+ 
+            str(bbox[2]/new_img.shape[1])+ " " + str(bbox[3]/new_img.shape[0]))
+    f.close()
 
 
-# original image
-visualize(annotations, category_id_to_name)
-plt.show()
 
-# Vertical flip
-aug = get_aug([VerticalFlip(p=1)])
-augmented = aug(**annotations)
-visualize(augmented, category_id_to_name)
+category_id_to_name = {0: 'cat', 1: 'dog'}
+folder_name = "/home/apoorv/Desktop/delta/rc_car/darknet/data/img/"
+augmentation_folder_name = "../augmentations/"
 
-plt.show()
+for filename in os.listdir(folder_name):
+    image = cv2.imread(os.path.join(folder_name,filename), cv2.COLOR_BGR2RGB)
+    if image is not None:
+        bbox_list = []
+        category_list = []
+        annotation_file = os.path.join(folder_name,filename)[:-3] + "txt"
+        complete_text = open(annotation_file, "r")
+        for line in complete_text:
+            category_list.append(int(line.split()[0]))
+            temp = [float(line.split()[1])*image.shape[1] - float(line.split()[3])*image.shape[1]/2, 
+                    float(line.split()[2])*image.shape[0] - float(line.split()[4])*image.shape[0]/2, 
+                    float(line.split()[3])*image.shape[1], 
+                    float(line.split()[4])*image.shape[0]]
+            bbox_list.append(temp)
 
-# Horizontal flip
-aug = get_aug([HorizontalFlip(p=1)])
-augmented = aug(**annotations)
-visualize(augmented, category_id_to_name)
+        bbox_list = np.asarray(bbox_list)
+        annotations = {'image': image, 'bboxes': bbox_list, 'category_id': category_list}
 
-plt.show()
+        # original image
+        visualize(annotations, category_id_to_name)
+        # plt.show()
 
+        # Vertical flip
+        aug = get_aug([VerticalFlip(p=1)])
+        augmented = aug(**annotations)
+        # visualize(augmented, category_id_to_name)
+        # plt.show()
+        save_augmented_img(augmented, category_id_to_name, filename[:-4], "vertical_flip_", augmentation_folder_name)
 
-# resize to square
-aug = get_aug([Resize(p=1, height=256, width=256)])
-augmented = aug(**annotations)
-visualize(augmented, category_id_to_name)
+        # Horizontal flip
+        aug = get_aug([HorizontalFlip(p=1)])
+        augmented = aug(**annotations)
+        # visualize(augmented, category_id_to_name)
+        # plt.show()
+        save_augmented_img(augmented, category_id_to_name, filename[:-4], "horizontal_flip_", augmentation_folder_name)
 
-plt.show()
+        # resize to square
+        aug = get_aug([Resize(p=1, height=256, width=256)])
+        augmented = aug(**annotations)
+        # visualize(augmented, category_id_to_name)
+        # plt.show()
+        save_augmented_img(augmented, category_id_to_name, filename[:-4], "resize_", augmentation_folder_name)
 
-# center crop
-aug = get_aug([CenterCrop(p=1, height=300, width=300)])
-augmented = aug(**annotations)
-visualize(augmented, category_id_to_name)
-plt.show()
+        # center crop
+        aug = get_aug([CenterCrop(p=1, height=300, width=300)])
+        augmented = aug(**annotations)
+        # visualize(augmented, category_id_to_name)
+        # plt.show()
+        save_augmented_img(augmented, category_id_to_name, filename[:-4], "center_crop_flip_", augmentation_folder_name)
+        sys.exit()
