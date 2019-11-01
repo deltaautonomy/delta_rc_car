@@ -57,6 +57,12 @@ def save_augmented_img(annotations, category_id_to_name, orig_file, aug_type, di
             str(bbox[2]/new_img.shape[1])+ " " + str(bbox[3]/new_img.shape[0]))
     f.close()
 
+def roi_crop(img, size=[480, 720]):
+    h, w, c = img.shape
+    del_side = (w-size[1])/2
+    del_top = h- size[0]
+    cropped_img = img[int(del_top):, int(del_side):int(-del_side), :]
+    return cropped_img
 
 if __name__ == "__main__":
     category_id_to_name = {0: 'cat', 1: 'dog'}
@@ -65,6 +71,8 @@ if __name__ == "__main__":
 
     for filename in os.listdir(folder_name):
         image = cv2.imread(os.path.join(folder_name,filename), cv2.COLOR_BGR2RGB)
+        image = roi_crop(image)
+        sys.exit()
         if image is not None:
             bbox_list = []
             category_list = []
