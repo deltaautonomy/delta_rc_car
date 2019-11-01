@@ -58,58 +58,58 @@ def save_augmented_img(annotations, category_id_to_name, orig_file, aug_type, di
     f.close()
 
 
+if __name__ == "__main__":
+    category_id_to_name = {0: 'cat', 1: 'dog'}
+    folder_name = "/home/apoorv/Desktop/delta/rc_car/darknet/data/img/"
+    augmentation_folder_name = "../augmentations/"
 
-category_id_to_name = {0: 'cat', 1: 'dog'}
-folder_name = "/home/apoorv/Desktop/delta/rc_car/darknet/data/img/"
-augmentation_folder_name = "../augmentations/"
+    for filename in os.listdir(folder_name):
+        image = cv2.imread(os.path.join(folder_name,filename), cv2.COLOR_BGR2RGB)
+        if image is not None:
+            bbox_list = []
+            category_list = []
+            annotation_file = os.path.join(folder_name,filename)[:-3] + "txt"
+            complete_text = open(annotation_file, "r")
+            for line in complete_text:
+                category_list.append(int(line.split()[0]))
+                temp = [float(line.split()[1])*image.shape[1] - float(line.split()[3])*image.shape[1]/2, 
+                        float(line.split()[2])*image.shape[0] - float(line.split()[4])*image.shape[0]/2, 
+                        float(line.split()[3])*image.shape[1], 
+                        float(line.split()[4])*image.shape[0]]
+                bbox_list.append(temp)
 
-for filename in os.listdir(folder_name):
-    image = cv2.imread(os.path.join(folder_name,filename), cv2.COLOR_BGR2RGB)
-    if image is not None:
-        bbox_list = []
-        category_list = []
-        annotation_file = os.path.join(folder_name,filename)[:-3] + "txt"
-        complete_text = open(annotation_file, "r")
-        for line in complete_text:
-            category_list.append(int(line.split()[0]))
-            temp = [float(line.split()[1])*image.shape[1] - float(line.split()[3])*image.shape[1]/2, 
-                    float(line.split()[2])*image.shape[0] - float(line.split()[4])*image.shape[0]/2, 
-                    float(line.split()[3])*image.shape[1], 
-                    float(line.split()[4])*image.shape[0]]
-            bbox_list.append(temp)
+            bbox_list = np.asarray(bbox_list)
+            annotations = {'image': image, 'bboxes': bbox_list, 'category_id': category_list}
 
-        bbox_list = np.asarray(bbox_list)
-        annotations = {'image': image, 'bboxes': bbox_list, 'category_id': category_list}
+            # original image
+            visualize(annotations, category_id_to_name)
+            # plt.show()
 
-        # original image
-        visualize(annotations, category_id_to_name)
-        # plt.show()
+            # Vertical flip
+            aug = get_aug([VerticalFlip(p=1)])
+            augmented = aug(**annotations)
+            # visualize(augmented, category_id_to_name)
+            # plt.show()
+            save_augmented_img(augmented, category_id_to_name, filename[:-4], "vertical_flip_", augmentation_folder_name)
 
-        # Vertical flip
-        aug = get_aug([VerticalFlip(p=1)])
-        augmented = aug(**annotations)
-        # visualize(augmented, category_id_to_name)
-        # plt.show()
-        save_augmented_img(augmented, category_id_to_name, filename[:-4], "vertical_flip_", augmentation_folder_name)
+            # Horizontal flip
+            aug = get_aug([HorizontalFlip(p=1)])
+            augmented = aug(**annotations)
+            # visualize(augmented, category_id_to_name)
+            # plt.show()
+            save_augmented_img(augmented, category_id_to_name, filename[:-4], "horizontal_flip_", augmentation_folder_name)
 
-        # Horizontal flip
-        aug = get_aug([HorizontalFlip(p=1)])
-        augmented = aug(**annotations)
-        # visualize(augmented, category_id_to_name)
-        # plt.show()
-        save_augmented_img(augmented, category_id_to_name, filename[:-4], "horizontal_flip_", augmentation_folder_name)
+            # resize to square
+            aug = get_aug([Resize(p=1, height=256, width=256)])
+            augmented = aug(**annotations)
+            # visualize(augmented, category_id_to_name)
+            # plt.show()
+            save_augmented_img(augmented, category_id_to_name, filename[:-4], "resize_", augmentation_folder_name)
 
-        # resize to square
-        aug = get_aug([Resize(p=1, height=256, width=256)])
-        augmented = aug(**annotations)
-        # visualize(augmented, category_id_to_name)
-        # plt.show()
-        save_augmented_img(augmented, category_id_to_name, filename[:-4], "resize_", augmentation_folder_name)
-
-        # center crop
-        aug = get_aug([CenterCrop(p=1, height=300, width=300)])
-        augmented = aug(**annotations)
-        # visualize(augmented, category_id_to_name)
-        # plt.show()
-        save_augmented_img(augmented, category_id_to_name, filename[:-4], "center_crop_flip_", augmentation_folder_name)
-        sys.exit()
+            # center crop
+            aug = get_aug([CenterCrop(p=1, height=300, width=300)])
+            augmented = aug(**annotations)
+            # visualize(augmented, category_id_to_name)
+            # plt.show()
+            save_augmented_img(augmented, category_id_to_name, filename[:-4], "center_crop_flip_", augmentation_folder_name)
+            sys.exit()
