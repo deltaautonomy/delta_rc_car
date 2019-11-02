@@ -129,54 +129,50 @@ struct MmwDemo_DetectedObj
 // Detected object structures for mmWave SDK 3.x (DPIF_PointCloudCartesian_t and DPIF_PointCloudSideInfo_t)
 
 /**
- * @brief
- *  Point cloud definition in Cartesian coordinate system - floating point format
- *
- */
+* @brief
+* Point cloud definition in Cartesian coordinate system - floating point format
+*
+*/
 typedef struct DPIF_PointCloudCartesian_t
 {
-    /*! @brief  x - coordinate in meters */
-    float  x;
+/*! @brief x - coordinate in meters */
+float x;
 
-    /*! @brief  y - coordinate in meters */
-    float  y;
+/*! @brief y - coordinate in meters */
+float y;
 
-    /*! @brief  z - coordinate in meters */
-    float  z;
+/*! @brief z - coordinate in meters */
+float z;
 
-    /*! @brief  Doppler velocity estimate in m/s. Positive velocity means target
-     *          is moving away from the sensor and negative velocity means target
-     *          is moving towards the sensor. */
-    float    velocity;
+/*! @brief Doppler velocity estimate in m/s. Positive velocity means target
+* is moving away from the sensor and negative velocity means target
+* is moving towards the sensor. */
+float velocity;
 }DPIF_PointCloudCartesian;
 
 /**
- * @brief
- *  Point cloud side information such as SNR and noise level
- *
- */
+* @brief
+* Point cloud side information such as SNR and noise level
+*
+*/
 typedef struct DPIF_PointCloudSideInfo_t
 {
-    /*! @brief  snr - CFAR cell to side noise ratio in dB expressed in 0.1 steps of dB */
-    int16_t  snr;
+/*! @brief snr - CFAR cell to side noise ratio in dB expressed in 0.1 steps of dB */
+int16_t snr;
 
-    /*! @brief  y - CFAR noise level of the side of the detected cell in dB expressed in 0.1 steps of dB */
-    int16_t  noise;
+/*! @brief y - CFAR noise level of the side of the detected cell in dB expressed in 0.1 steps of dB */
+int16_t noise;
 }DPIF_PointCloudSideInfo;
 
 
 struct mmwDataPacket{
-        
-    MmwDemo_output_message_header_t header;
-    
-    uint16_t numObjOut;
-    
-    uint16_t xyzQFormat;  // only used for SDK 1.x and 2.x
-    
-    MmwDemo_DetectedObj objOut;   // only used for SDK 1.x and 2.x
+MmwDemo_output_message_header_t header;
+uint16_t numObjOut;
+uint16_t xyzQFormat; // only used for SDK 1.x and 2.x
+MmwDemo_DetectedObj objOut; // only used for SDK 1.x and 2.x
 
-    DPIF_PointCloudCartesian_t newObjOut;  // used for SDK 3.x
-    DPIF_PointCloudSideInfo_t  sideInfo;   // used for SDK 3.x
+DPIF_PointCloudCartesian_t newObjOut; // used for SDK 3.x
+DPIF_PointCloudSideInfo_t sideInfo; // used for SDK 3.x
 };
 
 const uint8_t magicWord[8] = {2, 1, 4, 3, 6, 5, 8, 7};

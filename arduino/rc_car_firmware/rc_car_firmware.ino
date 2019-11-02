@@ -10,9 +10,9 @@
 /************************** MACROS **************************/
 
 #define DEFAULT_LED 13
-#define LEDR 11
+#define LEDR 9
 #define LEDG 10
-#define LEDB 9
+#define LEDB 11
 #define BLDC 3
 #define SERVO 5
 
