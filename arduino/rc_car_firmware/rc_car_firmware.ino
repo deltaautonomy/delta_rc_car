@@ -5,22 +5,31 @@
   @date 31-OCT-2019
 */
 
+#include <Servo.h>
 #include "communication.h"
 
 /************************** MACROS **************************/
 
 #define DEFAULT_LED 13
 #define LEDR 9
-#define LEDG 10
-#define LEDB 11
-#define BLDC 3
-#define SERVO 5
+#define LEDG 11
+#define LEDB 10
+#define BLDC 9
+#define SERVO 10
+#define MIN_THROTTLE 76
+#define MAX_THROTTLE 76
+#define MIN_STEER 70
+#define MID_STEER 98
+#define MAX_STEER 130
+#define SERVO_STEP 10
+
 
 /************************** GLOBALS **************************/
 
 // Colors
 enum class Color { red, yellow, green, cyan, blue, magenta, on, off };
-
+Servo steer_servo, motor_esc;
+uint8_t last_servo_signal = 0;
 /************************** RGB LED **************************/
 
 void set_rgb_digital(int r, int g, int b) {
@@ -72,22 +81,35 @@ void rgb_init() {
 
 void write_servo(uint8_t value) {
   // TODO: Implement slow servo sweep
-  analogWrite(SERVO, value);
+  uint8_t servo_signal;
+  if (value > 127)
+    servo_signal = map(value, 127, 255, MID_STEER, MAX_STEER);
+  else
+    servo_signal = map(value, 0, 127, MIN_STEER, MID_STEER);
+  servo_signal = constrain((servo_signal), last_servo_signal-SERVO_STEP, last_servo_signal+SERVO_STEP);
+
+  steer_servo.write(servo_signal);
+  last_servo_signal = servo_signal;
 }
 
 void write_bldc(uint8_t value) {
   // TODO: Implement slow sweep
-  analogWrite(BLDC, value);
+  uint8_t motor_signal = map(value, 0, 255, MIN_THROTTLE, MAX_THROTTLE);
+  motor_esc.write(motor_signal);
+}
+
+void actuator_reset() {
+  steer_servo.write(MID_STEER);
+  motor_esc.write(0);
 }
 
 void actuator_init() {
   // Set pin mode
-  pinMode(SERVO, OUTPUT);
-  pinMode(BLDC, OUTPUT);
+  steer_servo.attach(SERVO);
+  motor_esc.attach(BLDC);
 
   // Set default state
-  analogWrite(SERVO, 127);  // TODO: Calibrate this center angle
-  analogWrite(BLDC, 0);  // TODO: Verify this default value
+  actuator_reset();
 }
 
 /************************* ROUTINES *************************/
@@ -100,8 +122,11 @@ void main_routine() {
     analogWrite(LEDR, 255 - rx_packet.throttle);
     analogWrite(LEDB, 255 - rx_packet.steering);
     digitalWrite(LEDG, !rx_packet.direction);
+    write_bldc(rx_packet.throttle);
+    write_servo(rx_packet.steering);
   } else {
     set_rgb_color(Color::off);
+    actuator_reset();
   }
 }
 

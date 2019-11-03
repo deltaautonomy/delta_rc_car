@@ -13,6 +13,7 @@ from __future__ import print_function, absolute_import, division
 
 import sys
 import time
+import traceback
 
 from packet import Packet
 from joystick import Joystick
@@ -105,8 +106,9 @@ class RCCarController():
             except KeyboardInterrupt:
                 print('\n\n>>> USER STOPPED')
                 break
-            except Exception as e:
-                print('\n\n>>> ERROR OCCURRED:', e)
+            except Exception as error:
+                print('\n\n>>> ERROR OCCURRED:', error)
+                traceback.print_tb(error.__traceback__)
                 break
 
         self.xbee.close()
