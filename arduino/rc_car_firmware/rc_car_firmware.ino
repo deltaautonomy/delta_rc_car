@@ -14,10 +14,10 @@
 #define LEDR 9
 #define LEDG 11
 #define LEDB 10
-#define BLDC 9
+#define BLDC 11
 #define SERVO 10
-#define MIN_THROTTLE 76
-#define MAX_THROTTLE 76
+#define MIN_THROTTLE 76 //76
+#define MAX_THROTTLE 110 //90
 #define MIN_STEER 70
 #define MID_STEER 98
 #define MAX_STEER 130
@@ -100,7 +100,7 @@ void write_bldc(uint8_t value) {
 
 void actuator_reset() {
   steer_servo.write(MID_STEER);
-  motor_esc.write(0);
+  motor_esc.write(MIN_THROTTLE);
 }
 
 void actuator_init() {
@@ -119,14 +119,15 @@ void main_routine() {
   if (!recieve_data()) return;
 
   if (rx_packet.global_arm) {
-    analogWrite(LEDR, 255 - rx_packet.throttle);
-    analogWrite(LEDB, 255 - rx_packet.steering);
-    digitalWrite(LEDG, !rx_packet.direction);
+//    analogWrite(LEDR, 255 - rx_packet.throttle);
+//    analogWrite(LEDB, 255 - rx_packet.steering);
+//    digitalWrite(LEDG, !rx_packet.direction);
     write_bldc(rx_packet.throttle);
     write_servo(rx_packet.steering);
   } else {
-    set_rgb_color(Color::off);
+//    set_rgb_color(Color::off);
     actuator_reset();
+    
   }
 }
 
@@ -140,7 +141,7 @@ void display() {
 /*************************** MAIN ***************************/
 
 void setup() {
-  rgb_init();
+//  rgb_init();
   actuator_init();
   pinMode(DEFAULT_LED, OUTPUT);
   Serial.begin(9600);
