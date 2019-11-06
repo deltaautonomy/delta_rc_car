@@ -57,7 +57,7 @@ def save_augmented_img(annotations, category_id_to_name, orig_file, aug_type, di
             str(bbox[2]/new_img.shape[1])+ " " + str(bbox[3]/new_img.shape[0]))
     f.close()
 
-def roi_crop(img, size=[480, 720]):
+def roi_crop(img, size=[540, 720]):
     h, w, c = img.shape
     del_side = (w-size[1])/2
     del_top = h- size[0]
