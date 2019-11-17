@@ -60,6 +60,7 @@ find_package(PCL 1.7.2 REQUIRED)
 add_message_files(
   FILES
   RadarScan.msg
+  RadarScanArray.msg
 )
 
 ## Generate services in the 'srv' folder
