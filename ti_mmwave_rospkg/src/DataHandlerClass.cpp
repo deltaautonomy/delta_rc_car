@@ -2,7 +2,7 @@
 
 DataUARTHandler::DataUARTHandler(ros::NodeHandle* nh) : currentBufp(&pingPongBuffers[0]) , nextBufp(&pingPongBuffers[1]) {
     DataUARTHandler_pub = nh->advertise<sensor_msgs::PointCloud2>("/ti_mmwave/radar_scan_pcl", 100);
-    radar_scan_pub = nh->advertise<ti_mmwave_rospkg::RadarScan>("/ti_mmwave/radar_scan", 100);
+    radar_scan_pub = nh->advertise<ti_mmwave_rospkg::RadarScanArray>("/ti_mmwave/radar_scan_array", 100);
     marker_pub = nh->advertise<visualization_msgs::Marker>("/ti_mmwave/radar_scan_markers", 100);
     maxAllowedElevationAngleDeg = 90; // Use max angle if none specified
     maxAllowedAzimuthAngleDeg = 90; // Use max angle if none specified
@@ -242,6 +242,7 @@ void *DataUARTHandler::sortIncomingData( void )
     
     boost::shared_ptr<pcl::PointCloud<pcl::PointXYZI>> RScan(new pcl::PointCloud<pcl::PointXYZI>);
     ti_mmwave_rospkg::RadarScan radarscan;
+    ti_mmwave_rospkg::RadarScanArray radarscan_array;
 
     //wait for first packet to arrive
     pthread_mutex_lock(&countSync_mutex);
@@ -370,7 +371,10 @@ void *DataUARTHandler::sortIncomingData( void )
             //ROS_INFO("mmwData.numObjOut before = %d", mmwData.numObjOut);
 
             // Populate pointcloud
-            while( i < mmwData.numObjOut ) {
+            radarscan_array.header.frame_id = frameID;
+            radarscan_array.header.stamp = ros::Time::now();
+
+            while (i < mmwData.numObjOut) {
                 if (((mmwData.header.version >> 24) & 0xFF) < 3) { // SDK version is older than 3.x
                     //get object range index
                     memcpy( &mmwData.objOut.rangeIdx, &currentBufp->at(currentDatap), sizeof(mmwData.objOut.rangeIdx));
@@ -413,7 +417,7 @@ void *DataUARTHandler::sortIncomingData( void )
                     temp[4] = (float) mmwData.objOut.rangeIdx * vrange;
                     temp[5] = 10 * log10(mmwData.objOut.peakVal + 1);  // intensity
                     temp[6] = std::atan2(-temp[0], temp[1]) / M_PI * 180;
-                    
+
                     uint16_t tmp = (uint16_t)(temp[3] + nd / 2);
 
                     // Map mmWave sensor coordinates to ROS coordinate system
@@ -421,7 +425,7 @@ void *DataUARTHandler::sortIncomingData( void )
                     RScan->points[i].y = -temp[0];  // ROS standard coordinate system Y-axis is left which is the mmWave sensor -(X-axis)
                     RScan->points[i].z = temp[2];   // ROS standard coordinate system Z-axis is up which is the same as mmWave sensor Z-axis
                     RScan->points[i].intensity = temp[5];
-                    
+
                     radarscan.header.frame_id = frameID;
                     radarscan.header.stamp = ros::Time::now();
 
@@ -482,11 +486,12 @@ void *DataUARTHandler::sortIncomingData( void )
                                     (RScan->points[i].x != 0)
                            )
                 {
-                    radar_scan_pub.publish(radarscan);
+                    radarscan_array.scans.push_back(radarscan);
                 }
                 i++;
             }
 
+            radar_scan_pub.publish(radarscan_array);
             sorterState = CHECK_TLV_TYPE;
             
             break;

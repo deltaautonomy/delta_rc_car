@@ -2,6 +2,7 @@
 #define _DATA_HANDLER_CLASS_
 
 #include <ti_mmwave_rospkg/RadarScan.h>
+#include <ti_mmwave_rospkg/RadarScanArray.h>
 #include "mmWave.h"
 #include <iostream>
 #include <cstdio>
