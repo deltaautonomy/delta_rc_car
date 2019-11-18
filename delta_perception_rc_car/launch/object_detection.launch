@@ -12,6 +12,9 @@
         name="main"
         output="screen">
     </node>
+    
+    <node pkg="tf" type="static_transform_publisher" name="ego_vehicle_broadcaster"
+        args="0 0 0 0 0 0 map ego_vehicle 10" />
 
     <!-- Display object detection and tracking image -->
     <node
@@ -20,6 +23,6 @@
         type="image_view"
         respawn="false"
         output="screen">
-        <remap from="image" to="/delta/perception_rc_car/object_detection/image" />
+        <remap from="image" to="/delta/perception/object_detection/image" />
     </node>
 </launch>

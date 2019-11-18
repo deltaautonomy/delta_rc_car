@@ -62,6 +62,7 @@ class InversePerspectiveMapping:
         else:
             print('Loading calibration data from file...')
             self.ipm_matrix = np.asarray(self.info['calibration']['ipm_matrix']).reshape(3, 3)
+            print(self.ipm_matrix)
             self.ipm_matrix_inv = np.linalg.inv(self.ipm_matrix)
             self.ipm_image_dims = tuple(self.info['calibration']['ipm_image_dims'][::-1])
             self.ipm_px_to_m = self.info['calibration']['ipm_px_to_m']
@@ -99,6 +100,12 @@ class InversePerspectiveMapping:
         points_m[:, 1] += self.calibration_ego_y
 
         return points_m.squeeze()
+        
+    def apply_homography(self, point):
+        point = np.r_[point, 1]
+        out_point = np.matmul(self.ipm_matrix, point)
+        out_point = out_point / out_point[-1]
+        return out_point[:2]
 
 
 if __name__ == '__main__':
