@@ -71,7 +71,8 @@ def publish_radar_messages(targets, header, publishers):
 
         # Visualization marker
         radar_marker = make_cuboid(position=[target[0], target[1], 0], scale=[0.3] * 3,
-            frame_id=RADAR_FRAME, marker_id=i, duration=0.1, color=[1, 0, 0])
+            frame_id=RADAR_FRAME, marker_id=i, duration=0.1,
+            color=[1, 0, 0], timestamp=header.stamp)
         publishers['radar_marker_pub'].publish(radar_marker)
 
     publishers['radar_dets_pub'].publish(detections_array)

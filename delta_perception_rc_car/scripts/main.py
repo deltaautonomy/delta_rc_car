@@ -84,7 +84,7 @@ def camera_info_callback(camera_info):
         CAMERA_PROJECTION_MATRIX = np.matmul(np.asarray(CAMERA_INFO.P).reshape(3, 4), CAMERA_EXTRINSICS)
 
 
-def visualize(img, tracked_targets, detections, publishers, **kwargs):
+def visualize(img, tracked_targets, detections, publishers, timestamp, **kwargs):
     # Display tracked targets
     for tracked_target, detection in zip(tracked_targets, detections):
         label, score, bbox = detection
@@ -94,12 +94,13 @@ def visualize(img, tracked_targets, detections, publishers, **kwargs):
         cv2.putText(img, '%s [%d%%] [ID: %d]' % (label.decode('utf-8').title(), score * 100, tracker_id),
             (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
 
-    cv2_to_message(img, publishers['image_pub'])
+    cv2_to_message(img, publishers['image_pub'], timestamp)
 
 
-def publish_camera_tracks(publishers, tracked_targets, detections):
+def publish_camera_tracks(publishers, tracked_targets, detections, timestamp):
     camera_track_array = CameraTrackArray()
     camera_track_array.header.frame_id = EGO_VEHICLE_FRAME
+    camera_track_array.header.stamp = timestamp
     
     # Populate camera track message.
     for target, detection in zip(tracked_targets, detections):
@@ -117,7 +118,8 @@ def publish_camera_tracks(publishers, tracked_targets, detections):
 
         # Publish camera track marker for debugging.
         camera_marker = make_cuboid(position=[x, 0, -y], scale=[0.3] * 3, # scale=[0.5, 0.25, 0.3],
-            frame_id=EGO_VEHICLE_FRAME, marker_id=track_id, duration=0.5, color=[0, 0, 1])
+            frame_id=EGO_VEHICLE_FRAME, marker_id=track_id,
+            duration=0.5, color=[0, 0, 1], timestamp=timestamp)
         publishers['camera_marker_pub'].publish(camera_marker)
 
     # Publish the camera tarck data.
@@ -132,7 +134,7 @@ def roi_crop(img, size=[540, 720]):
     return cropped_img
 
 
-def perception_pipeline(img, publishers, vis=True, **kwargs):
+def perception_pipeline(img, timestamp, publishers, vis=True, **kwargs):
     # Log pipeline FPS
     all_fps.lap()
 
@@ -152,7 +154,7 @@ def perception_pipeline(img, publishers, vis=True, **kwargs):
     sort_fps.tick()
 
     # Publish camera tracks
-    publish_camera_tracks(publishers, tracked_targets, detections)
+    publish_camera_tracks(publishers, tracked_targets, detections, timestamp)
 
     # Display FPS logger status
     all_fps.tick()
@@ -161,7 +163,7 @@ def perception_pipeline(img, publishers, vis=True, **kwargs):
     # sys.stdout.flush()
 
     # Visualize and publish image message
-    if vis: visualize(img, tracked_targets, detections, publishers)
+    if vis: visualize(img, tracked_targets, detections, publishers, timestamp)
 
     return detections
 
@@ -177,7 +179,8 @@ def perception_callback(image_msg, publishers, **kwargs):
         sys.exit(1)
 
     # Run the perception pipeline
-    detections = perception_pipeline(img.copy(), publishers)
+    timestamp = image_msg.header.stamp
+    detections = perception_pipeline(img.copy(), timestamp, publishers)
 
 
 def shutdown_hook():
