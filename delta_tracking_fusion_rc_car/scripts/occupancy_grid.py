@@ -45,7 +45,7 @@ class OccupancyGridGenerator(object):
         self.info.height = int(range_x / self.info.resolution)  # Meters
         self.info.width = int(range_y / self.info.resolution)  # Meters
         self.x_offset = range_x / 2  # Center left-right about ego vehicle
-        self.info.origin = self.numpy_to_position([0, -self.x_offset, -0.5], Pose())
+        self.info.origin = self.numpy_to_position([0, -self.x_offset, -0.1], Pose())
 
         self.occupancy_grid = OccupancyGrid()
         self.occupancy_grid.info = self.info

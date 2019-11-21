@@ -17,6 +17,12 @@
         args="0 0 0 0 0 0 map rc_car 100" /> -->
 
     <node
+        pkg="tf"
+        type="static_transform_publisher"
+        name="static_rc_car_to_rviz"
+        args="0 0 0 0 1.5708 -1.5708 rc_car rviz 100" />
+
+    <node
         pkg="delta_perception_rc_car"
         type="main.py"
         name="object_detection"

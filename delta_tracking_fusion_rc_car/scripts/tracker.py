@@ -91,7 +91,7 @@ class Tracklet():
             
 
 class Tracker():
-    def __init__(self, hit_window=1, miss_window=5, verbose=False):
+    def __init__(self, hit_window=3, miss_window=5, verbose=False):
         self.tracks = {}
         self.hit_window = hit_window
         self.miss_window = miss_window
@@ -99,7 +99,7 @@ class Tracker():
         self.prev_timestamp = None
         self.verbose = verbose
 
-    def data_association(self, states_a, states_b, gating_threshold=10):
+    def data_association(self, states_a, states_b, gating_threshold=2):
         ''' Method to solve least cost problem for associating data from two 
         input lists of numpy arrays'''
         # Extract pose from states
@@ -175,6 +175,8 @@ class Tracker():
         # Assign temporary ID for each detection to keep track of its association status
         radar_dets = np.c_[inputs['radar'], np.arange(len(inputs['radar']))]
         camera_dets = np.c_[inputs['camera'], np.arange(len(inputs['camera']))]
+        # print(radar_dets, camera_dets)
+        # radar_dets = np.array([])
 
         # Compensating velocity of the input radar measurements with the ego vehicle velocity
         # radar_dets = self.velocity_compensation(inputs['ego_state'], radar_dets)

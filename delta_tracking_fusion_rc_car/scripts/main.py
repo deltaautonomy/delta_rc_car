@@ -41,8 +41,8 @@ from delta_msgs.msg import (CameraTrack,
 # Local python modules
 from utils import *
 from tracker import Tracker
-from scripts.occupancy_grid import OccupancyGridGenerator
-from scripts.cube_marker_publisher import make_label, make_pictogram, make_trajectory
+from occupancy_grid import OccupancyGridGenerator
+from cube_marker_publisher import make_label, make_pictogram, make_trajectory
 
 # Global objects
 STOP_FLAG = False
@@ -51,14 +51,14 @@ tf_listener = None
 trajectories = {}
 
 # Frames
-RADAR_FRAME = '/ego_vehicle/radar'
-EGO_VEHICLE_FRAME = 'ego_vehicle'
+RADAR_FRAME = 'ti_mmwave'
+EGO_VEHICLE_FRAME = 'rviz'
 
 # Classes
 pp = pprint.PrettyPrinter(indent=4)
 tracker = Tracker()
 # acc = mot.MOTAccumulator(auto_id=True)
-occupancy_grid = OccupancyGridGenerator(4, 5, EGO_VEHICLE_FRAME, 0.1)
+occupancy_grid = OccupancyGridGenerator(6, 10, EGO_VEHICLE_FRAME, 0.2)
 
 # FPS loggers
 FRAME_COUNT = 0
@@ -92,7 +92,7 @@ def make_track_msg(track_id, state, state_cov):
     return tracker_msg
 
 
-def publish_trajectory(publishers, track_id, state, tracks, smoothing=True):
+def publish_trajectory(publishers, track_id, state, tracks, smoothing=False):
     global trajectories
 
     # Create/update trajectory
@@ -104,7 +104,7 @@ def publish_trajectory(publishers, track_id, state, tracks, smoothing=True):
         length = len(trajectories[track_id])
         if length > 5:
             poly_degree = 4
-            window = int(min(np.ceil(length - 2) // 2 * 2 + 1, 51))
+            window = int(min(np.ceil(length - 2) // 2 * 2 + 1, 15))
             trajectories[track_id][:, 0] = savgol_filter(trajectories[track_id][:, 0], window, poly_degree)
             trajectories[track_id][:, 1] = savgol_filter(trajectories[track_id][:, 1], window, poly_degree)
 
@@ -134,7 +134,7 @@ def publish_messages(publishers, tracks, timestamp):
 
         # Label icon
         label_array_msg.pictograms.append(make_pictogram('fa-car',
-            np.r_[state[:2], 1], frame_id=EGO_VEHICLE_FRAME))
+            np.r_[state[:2], 0.9], frame_id=EGO_VEHICLE_FRAME))
 
         # Tracker message
         tracker_array_msg.tracks.append(make_track_msg(track_id, state, state_cov))
@@ -160,15 +160,15 @@ def publish_messages(publishers, tracks, timestamp):
         if track_id not in tracks: del trajectories[track_id]
 
 
-def get_tracker_inputs(camera_msg):
+def get_tracker_inputs(camera_msg, radar_msg):
     inputs = {'camera': [], 'radar': [], 'ego_state': []}
-    inputs['timestamp'] = rospy.Time.now().to_sec()
+    inputs['timestamp'] = radar_msg.header.stamp.to_sec()
 
     for track in camera_msg.tracks:
         inputs['camera'].append(np.asarray([track.x, track.y]))
     inputs['camera'] = np.asarray(inputs['camera'])
 
-    for detection in radar_msg.detectionss:
+    for detection in radar_msg.detections:
         pos = position_to_numpy(detection.position)
         vel = position_to_numpy(detection.velocity)
         inputs['radar'].append(np.asarray([pos[0], pos[1], vel[0], vel[1]]))
@@ -184,6 +184,7 @@ def publish_diagnostics(publishers):
 
 
 def tracking_fusion_pipeline(camera_msg, radar_msg, publishers, vis=True, **kwargs):
+    # print('\n' + ' *' * 20 + '\n')
     # Tracker update
     tracker_fps.lap()
     inputs = get_tracker_inputs(camera_msg, radar_msg)
@@ -194,8 +195,8 @@ def tracking_fusion_pipeline(camera_msg, radar_msg, publishers, vis=True, **kwar
     publish_messages(publishers, tracks, timestamp=camera_msg.header.stamp)
 
     # Display FPS logger status
-    sys.stdout.write('\r%s ' % (tracker_fps.get_log()))
-    sys.stdout.flush()
+    # sys.stdout.write('\r%s ' % (tracker_fps.get_log()))
+    # sys.stdout.flush()
 
     # Publish diagnostics status
     publish_diagnostics(publishers)

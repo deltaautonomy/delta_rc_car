@@ -67,10 +67,13 @@ def publish_radar_messages(targets, header, publishers):
         detection.velocity.x = target[3]
         detection.velocity.y = target[4]
         detection.amplitude = target[7]
-        detections_array.detections.append(detection)
+
+        # Filter detections
+        if target[0] < 5 and target[3] > 0:
+            detections_array.detections.append(detection)
 
         # Visualization marker
-        radar_marker = make_cuboid(position=[target[0], target[1], 0], scale=[0.3] * 3,
+        radar_marker = make_cuboid(position=[target[0], target[1], 0], scale=[0.2] * 3,
             frame_id=RADAR_FRAME, marker_id=i, duration=0.1,
             color=[1, 0, 0], timestamp=header.stamp)
         publishers['radar_marker_pub'].publish(radar_marker)
