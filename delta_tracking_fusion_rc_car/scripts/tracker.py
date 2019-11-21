@@ -175,7 +175,6 @@ class Tracker():
         # Assign temporary ID for each detection to keep track of its association status
         radar_dets = np.c_[inputs['radar'], np.arange(len(inputs['radar']))]
         camera_dets = np.c_[inputs['camera'], np.arange(len(inputs['camera']))]
-        radar_dets = np.array([])
 
         # Compensating velocity of the input radar measurements with the ego vehicle velocity
         # radar_dets = self.velocity_compensation(inputs['ego_state'], radar_dets)

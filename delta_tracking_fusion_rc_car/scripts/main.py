@@ -31,7 +31,7 @@ from nav_msgs.msg import OccupancyGrid
 from visualization_msgs.msg import Marker
 from jsk_rviz_plugins.msg import PictogramArray
 from diagnostic_msgs.msg import DiagnosticArray
-from radar_msgs.msg import RadarTrack, RadarTrackArray
+from radar_msgs.msg import RadarDetection, RadarDetectionArray
 from delta_msgs.msg import (CameraTrack,
                             CameraTrackArray,
                             EgoStateEstimate,
@@ -168,12 +168,11 @@ def get_tracker_inputs(camera_msg):
         inputs['camera'].append(np.asarray([track.x, track.y]))
     inputs['camera'] = np.asarray(inputs['camera'])
 
-    # for track in radar_msg.tracks:
-    #     pos_msg = position_to_numpy(track.track_shape.points[0])
-    #     # todo(prateek): trasnform this radar data to ego vehicle frame
-    #     inputs['radar'].append(np.asarray([pos_msg[0] - 2.2, pos_msg[1],
-    #         track.linear_velocity.x, track.linear_velocity.y]))
-    # inputs['radar'] = np.asarray(inputs['radar'])
+    for detection in radar_msg.detectionss:
+        pos = position_to_numpy(detection.position)
+        vel = position_to_numpy(detection.velocity)
+        inputs['radar'].append(np.asarray([pos[0], pos[1], vel[0], vel[1]]))
+    inputs['radar'] = np.asarray(inputs['radar'])
 
     return inputs
 
@@ -184,10 +183,10 @@ def publish_diagnostics(publishers):
     publishers['diag_pub'].publish(msg)
 
 
-def tracking_fusion_pipeline(camera_msg, publishers, vis=True, **kwargs):
+def tracking_fusion_pipeline(camera_msg, radar_msg, publishers, vis=True, **kwargs):
     # Tracker update
     tracker_fps.lap()
-    inputs = get_tracker_inputs(camera_msg)
+    inputs = get_tracker_inputs(camera_msg, radar_msg)
     tracks = tracker.update(inputs)
     tracker_fps.tick()
 
@@ -204,12 +203,12 @@ def tracking_fusion_pipeline(camera_msg, publishers, vis=True, **kwargs):
     return tracks
 
 
-def callback(camera_msg, publishers, **kwargs):
+def callback(camera_msg, radar_msg, publishers, **kwargs):
     # Node stop has been requested
     if STOP_FLAG: return
 
     # Run the tracking pipeline
-    tracks = tracking_fusion_pipeline(camera_msg, publishers)
+    tracks = tracking_fusion_pipeline(camera_msg, radar_msg, publishers)
 
     # Run the validation pipeline
     # validate(tracks, gt_msg)
@@ -241,9 +240,7 @@ def run(**kwargs):
 
     # Handle params and topics
     camera_track = rospy.get_param('~camera_track', '/delta/perception/ipm/camera_track')
-    radar_track = rospy.get_param('~radar_track', '/carla/ego_vehicle/radar/tracks')
-    ground_truth_track = rospy.get_param('~ground_truth_track', '/carla/ego_vehicle/tracks/ground_truth')
-    ego_state = rospy.get_param('~ego_state', '/delta/prediction/ego_vehicle/state')
+    radar_track = rospy.get_param('~radar_track', '/delta/perception/radar/detections')
     fused_track = rospy.get_param('~fused_track', '/delta/tracking_fusion/tracker/tracks')
     occupancy_topic = rospy.get_param('~occupancy_topic', '/delta/tracking_fusion/tracker/occupancy_grid')
     track_marker = rospy.get_param('~track_marker', '/delta/tracking_fusion/tracker/track_id_marker')
@@ -253,9 +250,7 @@ def run(**kwargs):
 
     # Display params and topics
     rospy.loginfo('CameraTrackArray topic: %s' % camera_track)
-    rospy.loginfo('RadarTrackArray topic: %s' % radar_track)
-    rospy.loginfo('Ground Trurh TrackArray topic: %s' % ground_truth_track)
-    rospy.loginfo('EgoStateEstimate topic: %s' % ego_state)
+    rospy.loginfo('RadarDetectionArray topic: %s' % radar_track)
     rospy.loginfo('TrackArray topic: %s' % fused_track)
     rospy.loginfo('OccupancyGrid topic: %s' % occupancy_topic)
     rospy.loginfo('Track ID Marker topic: %s' % track_marker)
@@ -274,13 +269,11 @@ def run(**kwargs):
 
     # Subscribe to topics
     camera_sub = message_filters.Subscriber(camera_track, CameraTrackArray)
-    # radar_sub = message_filters.Subscriber(radar_track, RadarTrackArray)
-    # ground_truth_sub = message_filters.Subscriber(ground_truth_track, TrackArray)
-    # state_sub = message_filters.Subscriber(ego_state, EgoStateEstimate)
+    radar_sub = message_filters.Subscriber(radar_track, RadarDetectionArray)
 
     # Synchronize the topics by time
     ats = message_filters.ApproximateTimeSynchronizer(
-        [camera_sub], queue_size=1, slop=0.5)
+        [camera_sub, radar_sub], queue_size=1, slop=0.5)
     ats.registerCallback(callback, publishers, **kwargs)
 
     # Shutdown hook
@@ -295,5 +288,4 @@ def run(**kwargs):
 
 if __name__ == '__main__':
     # Start tracking fusion node
-    rospy.init_node('tracking_fusion_pipeline')
     run()
