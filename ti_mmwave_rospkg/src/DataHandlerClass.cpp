@@ -373,6 +373,7 @@ void *DataUARTHandler::sortIncomingData( void )
             // Populate pointcloud
             radarscan_array.header.frame_id = frameID;
             radarscan_array.header.stamp = ros::Time::now();
+            radarscan_array.scans.clear();
 
             while (i < mmwData.numObjOut) {
                 if (((mmwData.header.version >> 24) & 0xFF) < 3) { // SDK version is older than 3.x
