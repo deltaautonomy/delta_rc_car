@@ -136,7 +136,7 @@ def make_trajectory(trajectory, frame_id='/map', marker_id=0,
 
 
 def make_cuboid(position, scale, frame_id='/map', marker_id=0,
-    duration=0, color=[1.0, 1.0, 1.0]):
+    duration=0, color=[1.0, 1.0, 1.0], timestamp=None):
     """ 
     Helper function for generating visualization markers
     
@@ -153,6 +153,7 @@ def make_cuboid(position, scale, frame_id='/map', marker_id=0,
     """
     marker = Marker()
     marker.header.frame_id = frame_id
+    marker.header.stamp = rospy.Time.now() if timestamp is None else timestamp
     marker.id = marker_id
     marker.type = marker.CUBE
     marker.text = str(marker_id)

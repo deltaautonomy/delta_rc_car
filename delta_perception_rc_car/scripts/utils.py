@@ -74,12 +74,14 @@ def message_to_cv2(msg):
         return None
 
 
-def cv2_to_message(img, topic):
+def cv2_to_message(img, topic, timestamp=None):
     # Publish image using CV bridge
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     try:
-        topic.publish(CV_BRIDGE.cv2_to_imgmsg(img, "bgr8"))
+        msg = CV_BRIDGE.cv2_to_imgmsg(img, "bgr8")
+        if timestamp is not None: msg.header.stamp = timestamp
+        topic.publish(msg)
     except CvBridgeError as e: 
         print(e)
         rospy.logerr(e)
