@@ -108,15 +108,15 @@ def publish_camera_tracks(publishers, tracked_targets, detections):
         # todo(heethesh): Verify u/v convention here
         [x, y] = ipm.apply_homography(np.array([(u1 + u2) / 2, v2]))  # Bottom mid-point of bbox
         camera_track = CameraTrack()
-        camera_track.x = y
-        camera_track.y = -x
+        camera_track.x = x
+        camera_track.y = y
         camera_track.track_id = track_id
         camera_track.label = label
         camera_track.confidence = score
         camera_track_array.tracks.append(camera_track)
 
         # Publish camera track marker for debugging.
-        camera_marker = make_cuboid(position=[x, y, 0], scale=[0.3] * 3, # scale=[0.5, 0.25, 0.3],
+        camera_marker = make_cuboid(position=[x, 0, -y], scale=[0.3] * 3, # scale=[0.5, 0.25, 0.3],
             frame_id=EGO_VEHICLE_FRAME, marker_id=track_id, duration=0.5, color=[0, 0, 1])
         publishers['camera_marker_pub'].publish(camera_marker)
 
