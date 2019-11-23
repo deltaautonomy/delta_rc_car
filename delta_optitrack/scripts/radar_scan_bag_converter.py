@@ -4,17 +4,21 @@
 # @Last Modified by:   Heethesh Vhavle
 # @Last Modified time: Nov 20, 2019
 
+import os
+
 import rospy
 import rosbag
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from ti_mmwave_rospkg.msg import RadarScan, RadarScanArray
 
 
 class BagConverter:
-    def __init__(self, old_filename, new_filename, write=False):
+    def __init__(self, old_filename, new_filename, write=False, fix_tf=False):
         self.write = write
+        self.fix_tf = fix_tf
         self.bag = rosbag.Bag(old_filename)
         
         if self.write:
@@ -35,8 +39,12 @@ class BagConverter:
         print('Found %d RadarScan PCL messages' % self.radar_scan_pcl_count)
 
     def copy_topics(self):
-        for topic, msg, timestamp in self.bag.read_messages():
-            if self.write: self.new_bag.write(topic, msg, timestamp)
+        if self.write:
+            if self.fix_tf:
+                self.fix_rc_car_frame()
+            else:
+                for topic, msg, timestamp in self.bag.read_messages():
+                    self.new_bag.write(topic, msg, timestamp)
 
     def convert(self):
         msg_count = 0
@@ -96,10 +104,26 @@ class BagConverter:
 
         print(len(point_counts), self.radar_scan_pcl_count)
         point_counts, pcl_counts = np.array(point_counts), np.array(pcl_counts) 
-        plt.plot(point_counts[:, 0], point_counts[:, 1])
-        plt.plot(pcl_counts[:, 0], pcl_counts[:, 1])
-        plt.grid()
-        plt.show()
+        # plt.plot(point_counts[:, 0], point_counts[:, 1])
+        # plt.plot(pcl_counts[:, 0], pcl_counts[:, 1])
+        # plt.grid()
+        # plt.show()
+
+    def fix_rc_car_frame(self):
+        if not self.write: print('Not updating TF (read-only mode)')
+        print('TF count before:', self.bag.get_message_count('/tf'))
+
+        for topic, msg, timestamp in self.bag.read_messages():
+            if topic == '/tf' and msg.transforms[0].child_frame_id == 'rc_car':
+                msg.transforms[0].transform.rotation.x = 0.0
+                msg.transforms[0].transform.rotation.y = 0.0
+                msg.transforms[0].transform.rotation.z = 0.0
+                msg.transforms[0].transform.rotation.w = 1.0
+                self.new_bag.write('/tf', msg, timestamp)
+            else:
+                self.new_bag.write(topic, msg, timestamp)
+
+        print('TF count after:', self.new_bag.get_message_count('/tf'))
 
     def close(self):
         self.bag.close()
@@ -107,9 +131,16 @@ class BagConverter:
 
 
 if __name__ == '__main__':
-    old_path = '/home/heethesh/ROS-Workspaces/rc_car_ws/bags/dynamic_walking/test_mod.bag'
-    new_path = '/home/heethesh/ROS-Workspaces/rc_car_ws/bags/dynamic_walking/test_mod.bag'
+    bag_folder = '/mnt/data/Datasets/OptiTrack/dynamic_walking'
+    target_folder = os.path.join(bag_folder, 'converted')
+    if not os.path.isdir(target_folder): os.makedirs(target_folder)
+    bag_files = os.listdir(bag_folder)
+    
+    for bag_file in tqdm(bag_files):
+        if not bag_file.endswith('.bag'): continue
+        old_path = os.path.join(bag_folder, bag_file)
+        new_path = os.path.join(target_folder, bag_file)
 
-    bag_converter = BagConverter(old_path, new_path, write=False)
-    bag_converter.convert()
-    bag_converter.close()
+        bag_converter = BagConverter(old_path, new_path, write=True, fix_tf=True)
+        bag_converter.convert()
+        bag_converter.close()
