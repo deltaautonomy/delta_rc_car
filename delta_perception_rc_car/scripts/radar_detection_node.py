@@ -64,12 +64,12 @@ def publish_radar_messages(targets, header, publishers):
         detection.position.x = target[0]
         detection.position.y = target[1]
         detection.velocity = Vector3()
-        detection.velocity.x = target[3]
-        detection.velocity.y = target[4]
-        detection.amplitude = target[7]
+        detection.velocity.x = target[2]
+        detection.velocity.y = target[3]
+        detection.amplitude = target[4]
 
         # Filter detections
-        if target[0] < 5 and target[3] > 0:
+        if target[5] < 5 and np.abs(target[7]) > 0:
             detections_array.detections.append(detection)
 
         # Visualization marker
@@ -86,7 +86,7 @@ def publish_radar_messages(targets, header, publishers):
 def radar_detector(radar_msg, publishers):
     # Convert radar scan array to numpy array
     states = np.array([[scan.x, scan.y, scan.velocity, scan.range, scan.bearing, scan.intensity]
-                        for scan in radar_msg.scans])
+                        for scan in radar_msg.scans if scan.range < 5])
 
     # Extract states
     x = states[:, 0]
@@ -99,8 +99,8 @@ def radar_detector(radar_msg, publishers):
     db = states[:, 5]
 
     # Clustering
-    features = np.c_[x, y, r, vx, vy, vr, th, db]
-    dbscan_instance = dbscan(features[:, :7], 0.7, 3)
+    features = np.c_[x, y, vx, vy, db, r, th, vr]
+    dbscan_instance = dbscan(features[:, 5:], 0.7, 3)
     dbscan_instance.process()
     clusters = dbscan_instance.get_clusters()
     targets = np.array([np.mean(features[cluster], axis=0) for cluster in clusters])
