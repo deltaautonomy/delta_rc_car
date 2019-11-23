@@ -207,9 +207,9 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 32.4846382
+      Max Intensity: 33.3142738
       Min Color: 0; 0; 0
-      Min Intensity: 17.3239384
+      Min Intensity: 10.4139271
       Name: Radar Point Cloud
       Position Transformer: XYZ
       Queue Size: 10
@@ -297,25 +297,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.72784948
+      Distance: 8.31788731
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.00460775755
-        Y: 0.461702526
-        Z: -2.4380734
+        X: 0.0889417157
+        Y: 0.628897607
+        Z: -2.92016292
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: true
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: -0.979797006
+      Pitch: -0.614797354
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.71287346
+      Yaw: 4.7278738
     Saved: ~
 Window Geometry:
   Displays:
