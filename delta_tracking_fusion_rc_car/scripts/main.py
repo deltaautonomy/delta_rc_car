@@ -58,7 +58,7 @@ EGO_VEHICLE_FRAME = 'rviz'
 pp = pprint.PrettyPrinter(indent=4)
 tracker = Tracker()
 # acc = mot.MOTAccumulator(auto_id=True)
-occupancy_grid = OccupancyGridGenerator(6, 10, EGO_VEHICLE_FRAME, 0.2)
+occupancy_grid = OccupancyGridGenerator(6, 10, EGO_VEHICLE_FRAME, 0.1)
 
 # FPS loggers
 FRAME_COUNT = 0
@@ -92,7 +92,7 @@ def make_track_msg(track_id, state, state_cov):
     return tracker_msg
 
 
-def publish_trajectory(publishers, track_id, state, tracks, smoothing=False):
+def publish_trajectory(publishers, track_id, state, tracks, smoothing=False, max_length=25):
     global trajectories
 
     # Create/update trajectory
@@ -109,7 +109,7 @@ def publish_trajectory(publishers, track_id, state, tracks, smoothing=False):
             trajectories[track_id][:, 1] = savgol_filter(trajectories[track_id][:, 1], window, poly_degree)
 
     # Publish the trajectory
-    publishers['traj_pub'].publish(make_trajectory(trajectories[track_id],
+    publishers['traj_pub'].publish(make_trajectory(trajectories[track_id][-max_length:],
         frame_id=EGO_VEHICLE_FRAME, marker_id=track_id, color=cmap(track_id % 10)))
 
 
@@ -125,8 +125,8 @@ def publish_messages(publishers, tracks, timestamp):
         # Occupancy grid
         state = tracks[track_id]['state']
         state_cov = tracks[track_id]['state_cov']
-        grid = occupancy_grid.place(state[:2], 100, grid)
-        # grid = occupancy_grid.place_gaussian(state[:2], state_cov[:2, :2], 100, grid)
+        # grid = occupancy_grid.place(state[:2], 100, grid)
+        grid = occupancy_grid.place_gaussian(state[:2], state_cov[:2, :2], 100, grid)
 
         # Text marker
         publishers['marker_pub'].publish(make_label('ID ' + str(track_id),

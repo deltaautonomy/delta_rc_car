@@ -43,10 +43,10 @@ class Tracklet():
         self.misses = 0
 
         # RADAR measurement noise
-        self.std_radar_x = 0.5  # 3
-        self.std_radar_y = 0.5  # 1
-        self.std_radar_vx = 0.5  # 1.5
-        self.std_radar_vy = 0.5  # 1
+        self.std_radar_x = 0.05  #3
+        self.std_radar_y = 0.05  # 1
+        self.std_radar_vx = 0.1  # 1.5
+        self.std_radar_vy = 0.1  # 1
         self.R_radar = np.diag([self.std_radar_x ** 2, self.std_radar_y ** 2,
                                 self.std_radar_vx ** 2, self.std_radar_vy ** 2])
 
@@ -91,7 +91,7 @@ class Tracklet():
             
 
 class Tracker():
-    def __init__(self, hit_window=3, miss_window=5, verbose=False):
+    def __init__(self, hit_window=4, miss_window=5, verbose=False):
         self.tracks = {}
         self.hit_window = hit_window
         self.miss_window = miss_window
@@ -99,7 +99,7 @@ class Tracker():
         self.prev_timestamp = None
         self.verbose = verbose
 
-    def data_association(self, states_a, states_b, gating_threshold=2):
+    def data_association(self, states_a, states_b, gating_threshold=1):
         ''' Method to solve least cost problem for associating data from two 
         input lists of numpy arrays'''
         # Extract pose from states
