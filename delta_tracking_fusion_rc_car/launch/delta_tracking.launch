@@ -5,7 +5,16 @@
         <!-- <arg name="filename" value="$(find delta_optitrack)/bags/test/static_test_01_tf.bag" /> -->
         <!-- <arg name="filename" value="$(find delta_optitrack)/bags/test/static_test_02_tf.bag" /> -->
         <!-- <arg name="filename" value="$(find delta_optitrack)/bags/test/dynamic_test_01.bag" /> -->
+
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-38-42.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-40-02.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-40-48.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-41-05.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-41-34.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-42-16.bag" /> -->
         <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-42-39.bag" />
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-44-02.bag" /> -->
+        <!-- <arg name="filename" value="$(find delta_optitrack)/bags/static/converted/2019-11-02-17-44-50.bag" /> -->
     </include>
 
     <param name ="/use_sim_time" value="true"/>

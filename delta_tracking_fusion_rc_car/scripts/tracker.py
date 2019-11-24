@@ -177,6 +177,7 @@ class Tracker():
         camera_dets = np.c_[inputs['camera'], np.arange(len(inputs['camera']))]
         # print(radar_dets, camera_dets)
         # radar_dets = np.array([])
+        # camera_dets = np.array([])
 
         # Compensating velocity of the input radar measurements with the ego vehicle velocity
         # radar_dets = self.velocity_compensation(inputs['ego_state'], radar_dets)
@@ -310,7 +311,7 @@ class Tracker():
         return fused_tracks
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     tracker = Tracker()
 
     # Data association test
