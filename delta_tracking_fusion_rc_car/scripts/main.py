@@ -18,7 +18,6 @@ from init_paths import *
 import pprint
 
 # External modules
-# import motmetrics as mot
 import matplotlib.pyplot as plt
 from scipy.signal import savgol_filter
 
@@ -34,7 +33,6 @@ from diagnostic_msgs.msg import DiagnosticArray
 from radar_msgs.msg import RadarDetection, RadarDetectionArray
 from delta_msgs.msg import (CameraTrack,
                             CameraTrackArray,
-                            EgoStateEstimate,
                             Track,
                             TrackArray)
 
@@ -57,27 +55,14 @@ EGO_VEHICLE_FRAME = 'rviz'
 # Classes
 pp = pprint.PrettyPrinter(indent=4)
 tracker = Tracker()
-# acc = mot.MOTAccumulator(auto_id=True)
 occupancy_grid = OccupancyGridGenerator(6, 10, EGO_VEHICLE_FRAME, 0.1)
 
 # FPS loggers
 FRAME_COUNT = 0
 tracker_fps = FPSLogger('Tracker')
-all_fps = FPSLogger('All')
 
 
 ########################### Functions ###########################
-
-
-def validate(tracks, gt_msg, max_sq_dist=100.0):
-    # Compute cost matrix.
-    detections = np.asarray([tracks[track_id]['state'][:2] for track_id in tracks])
-    ground_truth = np.asarray([[track.x, track.y] for track in gt_msg.tracks])
-    cost_matrix = mot.distances.norm2squared_matrix(ground_truth, detections, max_d2=max_sq_dist)
-
-    # Accumulate data for validation.
-    gt_labels = [track.track_id for track in gt_msg.tracks]
-    acc.update(gt_labels, tracks.keys(), cost_matrix)
 
 
 def make_track_msg(track_id, state, state_cov):
@@ -184,7 +169,6 @@ def publish_diagnostics(publishers):
 
 
 def tracking_fusion_pipeline(camera_msg, radar_msg, publishers, vis=True, **kwargs):
-    # print('\n' + ' *' * 20 + '\n')
     # Tracker update
     tracker_fps.lap()
     inputs = get_tracker_inputs(camera_msg, radar_msg)
@@ -211,27 +195,12 @@ def callback(camera_msg, radar_msg, publishers, **kwargs):
     # Run the tracking pipeline
     tracks = tracking_fusion_pipeline(camera_msg, radar_msg, publishers)
 
-    # Run the validation pipeline
-    # validate(tracks, gt_msg)
-
 
 def shutdown_hook():
     global STOP_FLAG
     STOP_FLAG = True
     time.sleep(3)
-
     print('\n\033[95m' + '*' * 30 + ' Delta Tracking and Fusion Shutdown ' + '*' * 30 + '\033[00m\n')
-    return
-
-    print('\n\033[95m' + '*' * 30 + ' MOT Events Summary ' + '*' * 30 + '\033[00m\n')
-    print(acc.mot_events)
-
-    # Compute and display tracking metrics
-    print('\n\033[95m' + '*' * 30 + ' MOT Metrics Summary ' + '*' * 30 + '\033[00m\n')
-    metrics = mot.metrics.create()
-    summary = metrics.compute(acc, metrics=mot.metrics.motchallenge_metrics, name='Overall')
-    print(mot.io.render_summary(summary, formatters=metrics.formatters,
-        namemap=mot.io.motchallenge_metric_names), '\n')
 
 
 def run(**kwargs):

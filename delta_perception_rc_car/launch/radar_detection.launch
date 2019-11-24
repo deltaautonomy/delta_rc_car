@@ -18,7 +18,6 @@
         pkg="delta_perception_rc_car"
         type="radar_detection_node.py"
         name="radar_detection"
-        output="screen">
-    </node>
+        output="screen" />
 
 </launch>
