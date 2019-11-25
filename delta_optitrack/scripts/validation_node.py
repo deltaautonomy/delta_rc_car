@@ -18,6 +18,7 @@ import time
 import os.path as osp
 
 # External modules
+import motmetrics as mot
 import numpy as np
 import matplotlib.pyplot as plt
 np.set_printoptions(precision=3, suppress=True, threshold=sys.maxsize)
@@ -116,8 +117,17 @@ class OptiTrackValidation:
         self.tf_buffer = tf2_ros.Buffer()
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer)
 
+        self.acc = mot.MOTAccumulator(auto_id=True)
         self.rc_car = OptiTrackData('rc_car', self.tf_buffer)
         self.oncoming_car = OptiTrackData('oncoming_car', self.tf_buffer)
+
+    def validate_iou(self, detection, ground_truth, bbox_dim=[2.0, 2.0], max_iou=0.5):
+        # Compute cost matrix.
+        cost_matrix = mot.distances.iou_matrix(np.array([np.r_[ground_truth, bbox_dim]]),
+            np.array([np.r_[detection, bbox_dim]]), max_iou=max_iou)
+
+        # Accumulate data for validation.
+        self.acc.update([0], [0], cost_matrix)
 
     def tracks_callback(self, tracks_msg, verbose=False):
         # Node stop has been requested
@@ -150,6 +160,9 @@ class OptiTrackValidation:
         self.position_det.append(detected_car[:2])
         self.velocity_det.append(detected_car[2:])
 
+        # MOT metrics
+        self.validate_iou(detected_car[:2], self.oncoming_car.state[:2])
+
     def plot(self):
         self.position_gt = np.array(self.position_gt)
         self.velocity_gt = np.array(self.velocity_gt)
@@ -180,11 +193,11 @@ class OptiTrackValidation:
         plt.figure()
         plt.title('Velocity Y (m/s)')
         plt.plot(self.velocity_gt[:, 1], label='Ground Truth')
-        plt.plot(-self.velocity_det[:, 1], label='Nearest Detection')
+        plt.plot(self.velocity_det[:, 1], label='Nearest Detection')
         plt.grid()
         plt.legend()
         filename = osp.join(osp.dirname(osp.realpath(__file__)), 'vy_plot.png')
-        plt.savefig(filename, dpi=300)
+        # plt.savefig(filename, dpi=300)
 
     def shutdown_hook(self):
         global STOP_FLAG
@@ -194,8 +207,13 @@ class OptiTrackValidation:
         print('\n\033[95m' + '*' * 25 + ' Delta OptiTrack Validation Results ' + '*' * 25 + '\033[00m\n')
         print('Position RMSE: %.3f m' % np.mean(self.position_errors))
         print('Velocity RMSE: %.3f m/s' % np.mean(self.velocity_errors))
-        print('Velocity Accuracy: %.2f%%' % (np.mean(self.velocity_success) * 100))
+        # print('Velocity Accuracy: %.2f%%' % (np.mean(self.velocity_success) * 100))
         self.plot()
+
+        metrics = mot.metrics.create()
+        summary = metrics.compute(self.acc, metrics=mot.metrics.motchallenge_metrics, name='Overall')
+        print(mot.io.render_summary(summary, formatters=metrics.formatters,
+            namemap=mot.io.motchallenge_metric_names), '\n')
 
 
 def run(**kwargs):
