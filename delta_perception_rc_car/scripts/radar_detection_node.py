@@ -69,7 +69,7 @@ def publish_radar_messages(targets, header, publishers):
         detection.amplitude = target[4]
 
         # Filter detections
-        if target[5] < 5 and np.abs(target[7]) > 0:
+        if target[5] < 7 and np.abs(target[7]) > 0:
             detections_array.detections.append(detection)
 
         # Visualization marker
@@ -86,7 +86,7 @@ def publish_radar_messages(targets, header, publishers):
 def radar_detector(radar_msg, publishers):
     # Convert radar scan array to numpy array
     states = np.array([[scan.x, scan.y, scan.velocity, scan.range, scan.bearing, scan.intensity]
-                        for scan in radar_msg.scans if scan.range < 5])
+                        for scan in radar_msg.scans if scan.range < 7])
 
     # Extract states
     x = states[:, 0]

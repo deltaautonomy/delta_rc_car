@@ -61,8 +61,8 @@ EGO_VEHICLE_FRAME = 'rviz'
 CAMERA_FRAME = 'rc_car/camera'
 
 # Perception models
-yolov3 = YOLO(configPath='cfg/yolov3-rc.cfg',
-              weightPath='weights/yolov3-rc.weights',
+yolov3 = YOLO(configPath='cfg/yolov3-tiny-rc.cfg',
+              weightPath='weights/yolov3-tiny-rc.weights',
               metaPath='cfg/rc-car_shoes.data')
 ipm = InversePerspectiveMapping()
 tracker = Sort(max_age=200, min_hits=1, use_dlib=False)
@@ -158,9 +158,9 @@ def perception_pipeline(img, timestamp, publishers, vis=True, **kwargs):
 
     # Display FPS logger status
     all_fps.tick()
-    # sys.stdout.write('\r%s | %s | %s ' % (all_fps.get_log(),
-    #     yolo_fps.get_log(), sort_fps.get_log()))
-    # sys.stdout.flush()
+    sys.stdout.write('\r%s | %s | %s ' % (all_fps.get_log(),
+        yolo_fps.get_log(), sort_fps.get_log()))
+    sys.stdout.flush()
 
     # Visualize and publish image message
     if vis: visualize(img, tracked_targets, detections, publishers, timestamp)

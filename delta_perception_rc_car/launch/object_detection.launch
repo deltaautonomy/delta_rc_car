@@ -14,15 +14,15 @@
     </node>
     
     <node pkg="tf" type="static_transform_publisher" name="ego_vehicle_broadcaster"
-        args="0 0 0 0 0 0 map ego_vehicle 10" />
+        args="0 0 0 0 0 0 map rc_car 10" />
 
     <!-- Display object detection and tracking image -->
-    <node
+    <!-- node
         name="image_view_object_detection"
         pkg="image_view"
         type="image_view"
         respawn="false"
         output="screen">
         <remap from="image" to="/delta/perception/object_detection/image" />
-    </node>
+    </node-->
 </launch>

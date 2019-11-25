@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+    <!-- Launch the radar -->
+    <include file="$(find ti_mmwave_rospkg)/launch/1642es2_short_range.launch" />
+
     <!-- Static transform from world to base_radar_link for visualization using Rviz -->
     <node
         pkg="tf"
