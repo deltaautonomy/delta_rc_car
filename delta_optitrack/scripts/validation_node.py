@@ -62,6 +62,26 @@ def find_nearest_pose(src, dst):
 ########################### Classes ###########################
 
 
+class AveragingFilter: 
+    def __init__: 
+        self.vx_history = []
+        self.vy_history = []
+    
+    def update(self, velocity):
+        vx, vy, vz = velocity
+        window_size = 10
+        if (len(self.vx_history) == window_size):
+            self.vx_history.remove(self.vx_history[0])
+            self.vy_history.remove(self.vy_history[0])
+
+        self.vx_history.append(vx)
+        self.vy_history.append(vy)
+
+        averaged_vx = np.mean(self.vx_history)
+        averaged_vy = np.mean(self.vy_history)
+        return np.array([averaged_vx, averaged_vy, 0])
+
+
 class OptiTrackData:
     def __init__(self, frame, tf_buffer):
         self.frame = frame
@@ -70,6 +90,7 @@ class OptiTrackData:
         self.timestamp = None
         self.first_time = True
         self.tf_buffer = tf_buffer
+        self.filter = AveragingFilter()
 
     @property
     def state(self):
@@ -102,6 +123,7 @@ class OptiTrackData:
         dt = timestamp - self.timestamp
         if dt.to_sec() < 0.009: return
         self.velocity = dx / dt.to_sec()
+        self.velocity = self.filter.update(self.velocity)
 
 
 class OptiTrackValidation:
