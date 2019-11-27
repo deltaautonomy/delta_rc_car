@@ -39,7 +39,7 @@ DARKNET_PATH = osp.join(PKG_PATH, 'darknet')
 # Handle package path and COCO names path
 print('Darknet Package:', DARKNET_PATH)
 add_path(DARKNET_PATH)
-darknet.fix_names_path(DARKNET_PATH, 'rc-car')
+darknet.fix_names_path(DARKNET_PATH, 'rc-car_shoes')
 
 
 class YOLO:

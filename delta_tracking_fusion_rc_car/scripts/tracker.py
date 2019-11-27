@@ -43,10 +43,10 @@ class Tracklet():
         self.misses = 0
 
         # RADAR measurement noise
-        self.std_radar_x = 0.5  # 3
-        self.std_radar_y = 0.5  # 1
-        self.std_radar_vx = 0.5  # 1.5
-        self.std_radar_vy = 0.5  # 1
+        self.std_radar_x = 0.05  #3
+        self.std_radar_y = 0.05  # 1
+        self.std_radar_vx = 0.1  # 1.5
+        self.std_radar_vy = 0.1  # 1
         self.R_radar = np.diag([self.std_radar_x ** 2, self.std_radar_y ** 2,
                                 self.std_radar_vx ** 2, self.std_radar_vy ** 2])
 
@@ -91,7 +91,7 @@ class Tracklet():
             
 
 class Tracker():
-    def __init__(self, hit_window=1, miss_window=5, verbose=False):
+    def __init__(self, hit_window=4, miss_window=5, verbose=False):
         self.tracks = {}
         self.hit_window = hit_window
         self.miss_window = miss_window
@@ -99,7 +99,7 @@ class Tracker():
         self.prev_timestamp = None
         self.verbose = verbose
 
-    def data_association(self, states_a, states_b, gating_threshold=10):
+    def data_association(self, states_a, states_b, gating_threshold=1):
         ''' Method to solve least cost problem for associating data from two 
         input lists of numpy arrays'''
         # Extract pose from states
@@ -175,7 +175,9 @@ class Tracker():
         # Assign temporary ID for each detection to keep track of its association status
         radar_dets = np.c_[inputs['radar'], np.arange(len(inputs['radar']))]
         camera_dets = np.c_[inputs['camera'], np.arange(len(inputs['camera']))]
-        radar_dets = np.array([])
+        # print(radar_dets, camera_dets)
+        # radar_dets = np.array([])
+        # camera_dets = np.array([])
 
         # Compensating velocity of the input radar measurements with the ego vehicle velocity
         # radar_dets = self.velocity_compensation(inputs['ego_state'], radar_dets)
@@ -309,7 +311,7 @@ class Tracker():
         return fused_tracks
 
 
-if __name__ == '__main__':    
+if __name__ == '__main__':
     tracker = Tracker()
 
     # Data association test

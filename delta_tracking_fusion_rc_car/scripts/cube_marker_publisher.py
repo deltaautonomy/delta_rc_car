@@ -124,7 +124,7 @@ def make_trajectory(trajectory, frame_id='/map', marker_id=0,
         point = Point()
         point.x = x
         point.y = y
-        point.z = 0.5
+        point.z = 0.15
         marker.points.append(point)    
     marker.scale.x = 0.03
     marker.color.r = color[0]
